@@ -24,6 +24,8 @@ def sanitize(f)
   f.gsub!(/—/, "&mdash;")
   f.gsub!(/↓/, "&darr;")
   f.gsub!(/↵/, "&crarr;")
+  f.gsub!(/‘/, "&lsquo;")
+  f.gsub!(/’/, "&rsquo;")
   f.chomp
 end
 
