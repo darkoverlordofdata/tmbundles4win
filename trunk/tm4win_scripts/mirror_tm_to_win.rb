@@ -43,8 +43,8 @@ rm_rf(TRANSIT_DIR + '/Bundles')
 rm_rf(TRANSIT_DIR + '/Support')
 
 # Export to transit dir
-puts `svn export #{TMREPO_DIR + '/Bundles'} #{TRANSIT_DIR}`
-puts `svn export #{TMREPO_DIR + '/Support'} #{TRANSIT_DIR}`
+puts `svn export #{TMREPO_DIR + '/Bundles'} #{TRANSIT_DIR}/Bundles`
+puts `svn export #{TMREPO_DIR + '/Support'} #{TRANSIT_DIR}/Support`
 
 # Sanitize the transit dir
 Find.find(TRANSIT_DIR) do |f|
@@ -58,8 +58,8 @@ Find.find(TRANSIT_DIR) do |f|
 end
 
 # Sync transit dir and tmbundles4win dir
-puts `rsync --archive --exclude .svn --verbose #{TRANSIT_DIR}/ #{WINREPO_DIR}/`
+puts `rsync --archive --exclude .svn --verbose #{TRANSIT_DIR}/ #{WINREPO_DIR}/trunk`
 
 # Commit tmbundles4win
-puts `svn ci #{WINREPO_DIR}`
+puts `svn add #{WINREPO_DIR}/trunk/* --force && svn ci #{WINREPO_DIR}/trunk -m "Sync"`
 
