@@ -2,10 +2,10 @@
 require 'cgi'
 require 'find'
 require 'fileutils'
-include Fileutils::Verbose
+include FileUtils::Verbose
 
 TMREPO_DIR  = "/home/gtc/repos/svn_textmate"
-TRANSIT_DIR = "/home/gtc/repos/tm4win"
+TRANSIT_DIR = "/home/gtc/repos/tm4win_transit"
 WINREPO_DIR = "/home/gtc/repos/tmbundles4win"
 
 def sanitize(f)
@@ -58,8 +58,8 @@ Find.find(TRANSIT_DIR) do |f|
 end
 
 # Sync transit dir and tmbundles4win dir
-puts `rsync -r --del #{TRANSIT_DIR} #{WINREPO_DIR}`
+puts `rsync --archive --exclude .svn --verbose #{TRANSIT_DIR}/ #{WINREPO_DIR}/`
 
 # Commit tmbundles4win
-puts `cvs ci #{WINREPO_DIR}`
+puts `svn ci #{WINREPO_DIR}`
 
