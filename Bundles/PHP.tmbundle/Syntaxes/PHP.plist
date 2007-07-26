@@ -119,68 +119,22 @@
 			<key>patterns</key>
 			<array>
 				<dict>
-					<key>captures</key>
-					<dict>
-						<key>1</key>
-						<dict>
-							<key>name</key>
-							<string>variable.other.php</string>
-						</dict>
-						<key>10</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.operator.index-end.php</string>
-						</dict>
-						<key>2</key>
-						<dict>
-							<key>name</key>
-							<string>punctuation.definition.variable.php</string>
-						</dict>
-						<key>4</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.operator.class.php</string>
-						</dict>
-						<key>5</key>
-						<dict>
-							<key>name</key>
-							<string>variable.other.property.php</string>
-						</dict>
-						<key>6</key>
-						<dict>
-							<key>name</key>
-							<string>keyword.operator.index-start.php</string>
-						</dict>
-						<key>7</key>
-						<dict>
-							<key>name</key>
-							<string>constant.numeric.index.php</string>
-						</dict>
-						<key>8</key>
-						<dict>
-							<key>name</key>
-							<string>variable.other.index.php</string>
-						</dict>
-						<key>9</key>
-						<dict>
-							<key>name</key>
-							<string>punctuation.definition.variable.php</string>
-						</dict>
-					</dict>
-					<key>comment</key>
-					<string>Simple syntax: $foo, $foo[0], $foo[$bar], $foo-&gt;bar</string>
 					<key>match</key>
-					<string>(?x)
-						((\$)(?&lt;name&gt;[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*))
-						(?:
-							(-&gt;)
-							(\g&lt;name&gt;)
-							|
-							(\[)
-								(?:(\d+|((\$)\g&lt;name&gt;)))
-							(\])
-						)?
-						</string>
+					<string>\\[0-7]{1,3}</string>
+					<key>name</key>
+					<string>constant.numeric.octal.php</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>\\x[0-9A-Fa-f]{1,2}</string>
+					<key>name</key>
+					<string>constant.numeric.hex.php</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>\\[nrt\\\$\"]</string>
+					<key>name</key>
+					<string>constant.character.escape.php</string>
 				</dict>
 				<dict>
 					<key>captures</key>
@@ -206,6 +160,91 @@
 					<key>match</key>
 					<string>(?x)
 						((\$\{)(?&lt;name&gt;[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(\}))
+						</string>
+				</dict>
+				<dict>
+					<key>captures</key>
+					<dict>
+						<key>1</key>
+						<dict>
+							<key>name</key>
+							<string>variable.other.php</string>
+						</dict>
+						<key>10</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.definition.variable.php</string>
+						</dict>
+						<key>11</key>
+						<dict>
+							<key>name</key>
+							<string>string.unquoted.index.php</string>
+						</dict>
+						<key>12</key>
+						<dict>
+							<key>name</key>
+							<string>invalid.illegal.invalid-simple-array-index.php</string>
+						</dict>
+						<key>13</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.operator.index-end.php</string>
+						</dict>
+						<key>2</key>
+						<dict>
+							<key>name</key>
+							<string>punctuation.definition.variable.php</string>
+						</dict>
+						<key>4</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.operator.class.php</string>
+						</dict>
+						<key>5</key>
+						<dict>
+							<key>name</key>
+							<string>variable.other.property.php</string>
+						</dict>
+						<key>6</key>
+						<dict>
+							<key>name</key>
+							<string>invalid.illegal.php</string>
+						</dict>
+						<key>7</key>
+						<dict>
+							<key>name</key>
+							<string>keyword.operator.index-start.php</string>
+						</dict>
+						<key>8</key>
+						<dict>
+							<key>name</key>
+							<string>constant.numeric.index.php</string>
+						</dict>
+						<key>9</key>
+						<dict>
+							<key>name</key>
+							<string>variable.other.index.php</string>
+						</dict>
+					</dict>
+					<key>comment</key>
+					<string>Simple syntax: $foo, $foo[0], $foo[$bar], $foo-&gt;bar</string>
+					<key>match</key>
+					<string>(?x)
+						((\$)(?&lt;name&gt;[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*))
+						(?:
+							(-&gt;)
+								(?:
+									(\g&lt;name&gt;)
+									|
+									(\$\g&lt;name&gt;)
+								)
+							|
+							(\[)
+								(?:(\d+)|((\$)\g&lt;name&gt;)|(\w+)|(.*?))
+							(\])
+							|
+							(\$foo)
+						)?
 						</string>
 				</dict>
 				<dict>
@@ -686,6 +725,79 @@
 					<key>patterns</key>
 					<array>
 						<dict>
+							<key>begin</key>
+							<string>(?x)
+									\s*(array) # Typehint
+									\s*(&amp;)? 					# Reference
+									\s*((\$+)[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*) # The variable name
+									\s*(=)	# A default value
+									\s*(array)\s*(\()
+									</string>
+							<key>beginCaptures</key>
+							<dict>
+								<key>1</key>
+								<dict>
+									<key>name</key>
+									<string>storage.type.php</string>
+								</dict>
+								<key>2</key>
+								<dict>
+									<key>name</key>
+									<string>storage.modifier.php</string>
+								</dict>
+								<key>3</key>
+								<dict>
+									<key>name</key>
+									<string>variable.other.php</string>
+								</dict>
+								<key>4</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.definition.variable.php</string>
+								</dict>
+								<key>5</key>
+								<dict>
+									<key>name</key>
+									<string>keyword.operator.assignment.php</string>
+								</dict>
+								<key>6</key>
+								<dict>
+									<key>name</key>
+									<string>support.function.construct.php</string>
+								</dict>
+								<key>7</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.definition.array.begin.php</string>
+								</dict>
+							</dict>
+							<key>contentName</key>
+							<string>meta.array.php</string>
+							<key>end</key>
+							<string>\)</string>
+							<key>endCaptures</key>
+							<dict>
+								<key>0</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.definition.array.end.php</string>
+								</dict>
+							</dict>
+							<key>name</key>
+							<string>meta.function.argument.array.php</string>
+							<key>patterns</key>
+							<array>
+								<dict>
+									<key>include</key>
+									<string>#strings</string>
+								</dict>
+								<dict>
+									<key>include</key>
+									<string>#numbers</string>
+								</dict>
+							</array>
+						</dict>
+						<dict>
 							<key>captures</key>
 							<dict>
 								<key>1</key>
@@ -696,7 +808,7 @@
 								<key>2</key>
 								<dict>
 									<key>name</key>
-									<string>support.class.php</string>
+									<string>storage.modifier.php</string>
 								</dict>
 								<key>3</key>
 								<dict>
@@ -725,7 +837,77 @@
 								</dict>
 							</dict>
 							<key>match</key>
-							<string>\s*(?i:(array)|([A-Za-z_][A-Za-z_0-9]*))\s*((\$+)[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\s*(=)\s*((?i:NULL)|(.+?)))?\s*(?=,|\))</string>
+							<string>(?x)
+									\s*(array) # Typehint
+									\s*(&amp;)? 					# Reference
+									\s*((\$+)[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*) # The variable name
+									(?:
+										\s*(=)	# A default value
+										\s*(?i:
+											(NULL)
+											|
+											(\S.*?)
+											)?
+									)?
+									\s*(?=,|\)) # A closing parentheses (end of argument list) or a comma
+									</string>
+							<key>name</key>
+							<string>meta.function.argument.array.php</string>
+						</dict>
+						<dict>
+							<key>captures</key>
+							<dict>
+								<key>1</key>
+								<dict>
+									<key>name</key>
+									<string>support.class.php</string>
+								</dict>
+								<key>2</key>
+								<dict>
+									<key>name</key>
+									<string>storage.modifier.php</string>
+								</dict>
+								<key>3</key>
+								<dict>
+									<key>name</key>
+									<string>variable.other.php</string>
+								</dict>
+								<key>4</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.definition.variable.php</string>
+								</dict>
+								<key>5</key>
+								<dict>
+									<key>name</key>
+									<string>keyword.operator.assignment.php</string>
+								</dict>
+								<key>6</key>
+								<dict>
+									<key>name</key>
+									<string>constant.language.php</string>
+								</dict>
+								<key>7</key>
+								<dict>
+									<key>name</key>
+									<string>invalid.illegal.non-null-typehinted.php</string>
+								</dict>
+							</dict>
+							<key>match</key>
+							<string>(?x)
+									\s*([A-Za-z_][A-Za-z_0-9]*) # Typehinted class name
+									\s*(&amp;)? 					# Reference
+									\s*((\$+)[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*) # The variable name
+									(?:
+										\s*(=)	# A default value
+										\s*(?i:
+											(NULL)
+											|
+											(\S.*?)
+											)?
+									)?
+									\s*(?=,|\)) # A closing parentheses (end of argument list) or a comma
+									</string>
 							<key>name</key>
 							<string>meta.function.argument.typehinted.php</string>
 						</dict>
@@ -735,35 +917,45 @@
 								<key>1</key>
 								<dict>
 									<key>name</key>
-									<string>variable.other.php</string>
+									<string>storage.modifier.php</string>
 								</dict>
 								<key>2</key>
+								<dict>
+									<key>name</key>
+									<string>variable.other.php</string>
+								</dict>
+								<key>3</key>
 								<dict>
 									<key>name</key>
 									<string>punctuation.definition.variable.php</string>
 								</dict>
 							</dict>
 							<key>match</key>
-							<string>\s*((\$+)[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)\s*(?=,|\))</string>
+							<string>(\s*&amp;)?\s*((\$+)[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)\s*(?=,|\))</string>
 							<key>name</key>
 							<string>meta.function.argument.no-default.php</string>
 						</dict>
 						<dict>
 							<key>begin</key>
-							<string>\s*((\$+)[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\s*(=)\s*)\s*</string>
+							<string>(\s*&amp;)?\s*((\$+)[a-zA-Z_\x{7f}-\x{ff}][a-zA-Z0-9_\x{7f}-\x{ff}]*)(?:\s*(=)\s*)\s*</string>
 							<key>captures</key>
 							<dict>
 								<key>1</key>
 								<dict>
 									<key>name</key>
-									<string>variable.other.php</string>
+									<string>storage.modifier.php</string>
 								</dict>
 								<key>2</key>
 								<dict>
 									<key>name</key>
-									<string>punctuation.definition.variable.php</string>
+									<string>variable.other.php</string>
 								</dict>
 								<key>3</key>
+								<dict>
+									<key>name</key>
+									<string>punctuation.definition.variable.php</string>
+								</dict>
+								<key>4</key>
 								<dict>
 									<key>name</key>
 									<string>keyword.operator.assignment.php</string>
@@ -1299,10 +1491,8 @@
 					<key>patterns</key>
 					<array>
 						<dict>
-							<key>match</key>
-							<string>\\.</string>
-							<key>name</key>
-							<string>constant.character.escape.php</string>
+							<key>include</key>
+							<string>#interpolation</string>
 						</dict>
 					</array>
 				</dict>
@@ -1311,12 +1501,6 @@
 					<string>[$^+*]</string>
 					<key>name</key>
 					<string>keyword.operator.regexp.php</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\\.</string>
-					<key>name</key>
-					<string>constant.character.escape.php</string>
 				</dict>
 			</array>
 		</dict>
@@ -1416,6 +1600,8 @@
 					<string>punctuation.definition.string.begin.php</string>
 				</dict>
 			</dict>
+			<key>contentName</key>
+			<string>source.sql.embedded.php</string>
 			<key>end</key>
 			<string>"</string>
 			<key>endCaptures</key>
@@ -1432,9 +1618,99 @@
 			<array>
 				<dict>
 					<key>match</key>
+					<string>#(\\"|[^"])*(?="|$\n?)</string>
+					<key>name</key>
+					<string>comment.line.number-sign.sql</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>--(\\"|[^"])*(?="|$\n?)</string>
+					<key>name</key>
+					<string>comment.line.double-dash.sql</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>'(?=[^']*?")</string>
+					<key>comment</key>
+					<string>Unclosed strings must be captured to avoid them eating the remainder of the PHP script
+					Sample case: $sql = "SELECT * FROM bar WHERE foo = '" . $variable . "'"</string>
+					<key>end</key>
+					<string>(?=")</string>
+					<key>name</key>
+					<string>string.quoted.single.unclosed.sql</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\\[\\']</string>
+							<key>name</key>
+							<string>constant.character.escape.php</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>\\"(?!([^\\"]|\\[^"])*\\")(?=(\\[^"]|.)*?")</string>
+					<key>comment</key>
+					<string>Unclosed strings must be captured to avoid them eating the remainder of the PHP script
+					Sample case: $sql = "SELECT * FROM bar WHERE foo = '" . $variable . "'"</string>
+					<key>end</key>
+					<string>(?=")</string>
+					<key>name</key>
+					<string>string.quoted.double.unclosed.sql</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\\[\\']</string>
+							<key>name</key>
+							<string>constant.character.escape.php</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>\\"</string>
+					<key>captures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>constant.character.escape.php</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>\\"</string>
+					<key>name</key>
+					<string>string.quoted.double.sql</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#interpolation</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>match</key>
 					<string>\\.</string>
 					<key>name</key>
 					<string>constant.character.escape.php</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>'</string>
+					<key>end</key>
+					<string>'</string>
+					<key>name</key>
+					<string>string.quoted.single.sql</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#interpolation</string>
+						</dict>
+					</array>
 				</dict>
 				<dict>
 					<key>include</key>
@@ -1458,6 +1734,8 @@
 					<string>punctuation.definition.string.begin.php</string>
 				</dict>
 			</dict>
+			<key>contentName</key>
+			<string>source.sql.embedded.php</string>
 			<key>end</key>
 			<string>'</string>
 			<key>endCaptures</key>
@@ -1472,6 +1750,74 @@
 			<string>string.quoted.single.sql.php</string>
 			<key>patterns</key>
 			<array>
+				<dict>
+					<key>match</key>
+					<string>#(\\'|[^'])*(?='|$\n?)</string>
+					<key>name</key>
+					<string>comment.line.number-sign.sql</string>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>--(\\'|[^'])*(?='|$\n?)</string>
+					<key>name</key>
+					<string>comment.line.double-dash.sql</string>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>\\'(?!([^\\']|\\[^'])*\\')(?=(\\[^']|.)*?')</string>
+					<key>comment</key>
+					<string>Unclosed strings must be captured to avoid them eating the remainder of the PHP script
+					Sample case: $sql = "SELECT * FROM bar WHERE foo = '" . $variable . "'"</string>
+					<key>end</key>
+					<string>(?=')</string>
+					<key>name</key>
+					<string>string.quoted.single.unclosed.sql</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\\[\\']</string>
+							<key>name</key>
+							<string>constant.character.escape.php</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>"(?=[^"]*?')</string>
+					<key>comment</key>
+					<string>Unclosed strings must be captured to avoid them eating the remainder of the PHP script
+					Sample case: $sql = "SELECT * FROM bar WHERE foo = '" . $variable . "'"</string>
+					<key>end</key>
+					<string>(?=')</string>
+					<key>name</key>
+					<string>string.quoted.double.unclosed.sql</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\\[\\']</string>
+							<key>name</key>
+							<string>constant.character.escape.php</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>\\'</string>
+					<key>captures</key>
+					<dict>
+						<key>0</key>
+						<dict>
+							<key>name</key>
+							<string>constant.character.escape.php</string>
+						</dict>
+					</dict>
+					<key>end</key>
+					<string>\\'</string>
+					<key>name</key>
+					<string>string.quoted.single.sql</string>
+				</dict>
 				<dict>
 					<key>match</key>
 					<string>\\[\\']</string>
@@ -1548,12 +1894,6 @@
 			<string>string.quoted.double.php</string>
 			<key>patterns</key>
 			<array>
-				<dict>
-					<key>match</key>
-					<string>\\.</string>
-					<key>name</key>
-					<string>constant.character.escape.php</string>
-				</dict>
 				<dict>
 					<key>include</key>
 					<string>#interpolation</string>

@@ -18,7 +18,7 @@
 	<string>&lt;!DOCTYPE|&lt;(?i:html)</string>
 	<key>foldingStartMarker</key>
 	<string>(?x)
-		(&lt;(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|form|dl)\b.*?&gt;
+		(&lt;(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl)\b.*?&gt;
 		|&lt;!--(?!.*--\s*&gt;)
 		|^&lt;!--\ \#tminclude\ (?&gt;.*?--&gt;)$
 		|&lt;\?(?:php)?.*\b(if|for(each)?|while)\b.+:
@@ -27,7 +27,7 @@
 		)</string>
 	<key>foldingStopMarker</key>
 	<string>(?x)
-		(&lt;/(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|form|dl)&gt;
+		(&lt;/(?i:head|body|table|thead|tbody|tfoot|tr|div|select|fieldset|style|script|ul|ol|li|form|dl)&gt;
 		|^(?!.*?&lt;!--).*?--\s*&gt;
 		|^&lt;!--\ end\ tminclude\ --&gt;$
 		|&lt;\?(?:php)?.*\bend(if|for(each)?|while)\b
@@ -578,9 +578,7 @@
 					<key>applyEndPatternLast</key>
 					<integer>1</integer>
 					<key>begin</key>
-					<string>(?:^\s*)(?=&lt;\?(?i:php|=)?(?!.*\?&gt;))</string>
-					<key>comment</key>
-					<string>match only multi-line PHP with leading whitespace</string>
+					<string>(?=&lt;\?(?i:php|=)?(?!.*\?&gt;))</string>
 					<key>end</key>
 					<string>(?&lt;=\?&gt;)(?:\s*$\n)?</string>
 					<key>name</key>
@@ -599,7 +597,7 @@
 					<key>begin</key>
 					<string>(?=&lt;\?(?i:php|=)?)</string>
 					<key>end</key>
-					<string>(?&lt;=\?&gt;)</string>
+					<string>(?&lt;=\?&gt;)(?:\s*$\n)?</string>
 					<key>name</key>
 					<string>source.php.embedded.line.html</string>
 					<key>patterns</key>
