@@ -23,7 +23,7 @@
 		</dict>
 		<dict>
 			<key>match</key>
-			<string>\b(val|datatype|struct|as|let|in|abstype|local|where|case|of|fn|raise|exception|handle|ref|infix|infixr|before|end)\b</string>
+			<string>\b(val|datatype|struct|as|let|in|abstype|local|where|case|of|fn|raise|exception|handle|ref|infix|infixr|before|end|structure|withtype)\b</string>
 			<key>name</key>
 			<string>keyword.other.ml</string>
 		</dict>
@@ -163,7 +163,7 @@
 				</dict>
 			</dict>
 			<key>end</key>
-			<string>(?==|:)</string>
+			<string>(?==|:|\()</string>
 			<key>name</key>
 			<string>meta.module.dec.ml</string>
 		</dict>
@@ -209,22 +209,6 @@
 				</dict>
 			</array>
 		</dict>
-		<dict>
-			<key>captures</key>
-			<dict>
-				<key>2</key>
-				<dict>
-					<key>name</key>
-					<string>constant.other.type.ml</string>
-				</dict>
-			</dict>
-			<key>comment</key>
-			<string>type annotation/ascription</string>
-			<key>match</key>
-			<string>[^:](:)\s*(([a-zA-Z0-9\.\*\_ ]|(\-&gt;))*)</string>
-			<key>name</key>
-			<string>meta.type.ascription.ml</string>
-		</dict>
 	</array>
 	<key>repository</key>
 	<dict>
@@ -247,6 +231,13 @@
 					<string>\*\)</string>
 					<key>name</key>
 					<string>comment.block.ml</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#comments</string>
+						</dict>
+					</array>
 				</dict>
 			</array>
 		</dict>
@@ -262,13 +253,20 @@
 							<key>name</key>
 							<string>keyword.other.ml</string>
 						</dict>
+						<key>2</key>
+						<dict>
+							<key>name</key>
+							<string>entity.name.type.abbrev.ml</string>
+						</dict>
 					</dict>
 					<key>match</key>
-					<string>\b(type)\b</string>
+					<string>\b(type)\s+([a-zA-Z][a-zA-Z0-9'_]*)</string>
 					<key>name</key>
 					<string>meta.spec.ml.type</string>
 				</dict>
 				<dict>
+					<key>begin</key>
+					<string>\b(datatype)\s+([a-zA-Z][a-zA-Z0-9'_]*)\s*(?==)</string>
 					<key>captures</key>
 					<dict>
 						<key>1</key>
@@ -276,11 +274,77 @@
 							<key>name</key>
 							<string>keyword.other.ml</string>
 						</dict>
+						<key>2</key>
+						<dict>
+							<key>name</key>
+							<string>entity.name.type.datatype.ml</string>
+						</dict>
 					</dict>
-					<key>match</key>
-					<string>\b(datatype)\b</string>
+					<key>end</key>
+					<string>(?=val|type|eqtype|datatype|structure|include)</string>
 					<key>name</key>
 					<string>meta.spec.ml.datatype</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>captures</key>
+							<dict>
+								<key>1</key>
+								<dict>
+									<key>name</key>
+									<string>keyword.other.ml</string>
+								</dict>
+								<key>2</key>
+								<dict>
+									<key>name</key>
+									<string>entity.name.type.datatype.ml</string>
+								</dict>
+							</dict>
+							<key>match</key>
+							<string>\b(and)\s+([a-zA-Z][a-zA-Z0-9'_]*)\s*(?==)</string>
+							<key>name</key>
+							<string>meta.spec.ml.datatype</string>
+						</dict>
+						<dict>
+							<key>captures</key>
+							<dict>
+								<key>1</key>
+								<dict>
+									<key>name</key>
+									<string>variable.other.dcon.ml</string>
+								</dict>
+								<key>2</key>
+								<dict>
+									<key>name</key>
+									<string>keyword.other.ml</string>
+								</dict>
+							</dict>
+							<key>match</key>
+							<string>(?x)
+							=\s*([a-zA-Z][a-zA-Z0-9'_]*)(\s+of)?</string>
+							<key>name</key>
+							<string>meta.datatype.rule.main.ml</string>
+						</dict>
+						<dict>
+							<key>captures</key>
+							<dict>
+								<key>1</key>
+								<dict>
+									<key>name</key>
+									<string>variable.other.dcon.ml</string>
+								</dict>
+								<key>2</key>
+								<dict>
+									<key>name</key>
+									<string>keyword.other.ml</string>
+								</dict>
+							</dict>
+							<key>match</key>
+							<string>\|\s*([a-zA-Z][a-zA-Z0-9'_]*)(\s+of)?</string>
+							<key>name</key>
+							<string>meta.datatype.rule.other.ml</string>
+						</dict>
+					</array>
 				</dict>
 				<dict>
 					<key>captures</key>
@@ -297,6 +361,8 @@
 					<string>meta.spec.ml.val</string>
 				</dict>
 				<dict>
+					<key>begin</key>
+					<string>\b(structure)\s*(\w+)\s*:</string>
 					<key>captures</key>
 					<dict>
 						<key>1</key>
@@ -310,10 +376,19 @@
 							<string>entity.name.type.module.ml</string>
 						</dict>
 					</dict>
-					<key>match</key>
-					<string>\b(structure)\s*(\w+)\s*:</string>
+					<key>end</key>
+					<string>(?=val|type|eqtype|datatype|structure|include)</string>
 					<key>name</key>
 					<string>meta.spec.ml.structure</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\b(sharing)\b</string>
+							<key>name</key>
+							<string>keyword.other.ml</string>
+						</dict>
+					</array>
 				</dict>
 				<dict>
 					<key>captures</key>

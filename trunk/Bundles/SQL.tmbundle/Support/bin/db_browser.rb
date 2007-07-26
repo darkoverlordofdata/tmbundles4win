@@ -3,6 +3,7 @@
 require 'optparse'
 require 'ostruct'
 require 'erb'
+require 'iconv'
 require File.dirname(__FILE__) + '/db_browser_lib'
 require 'cgi'
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/web_preview" if ENV["TM_SUPPORT_PATH"]
@@ -28,7 +29,7 @@ require "#{ENV["TM_SUPPORT_PATH"]}/lib/osx/plist" if ENV["TM_SUPPORT_PATH"]
 # Parse commandline options
 begin
   OptionParser.new do |opts|
-    opts.banner = "Usage: db_browse.rb [options]"
+    opts.banner = "Usage: db_browser.rb [options]"
 
     opts.on("--database database", "Set database name") { |database| @options.database.name = database }
     opts.on("--table table", "Set database table") { |table| @options.database.table = table }
@@ -134,10 +135,16 @@ end
 
 def format(content, type)
   return '' unless content
+  begin
+    Iconv.iconv('utf-8', 'utf-8', content)
+  rescue Exception => e
+    content = content.unpack('C*').map { |ch| ch < 128 ? ch : ?? }.pack('C*')
+  end
   if type == :number
     content
   else
-    full_content = content = escape(content).gsub("\n", "<br>")
+    full_content = escape(content)
+    content = escape(content).gsub("\n", "<br>")
     if content.length > 30
       content = content[0..30] + '<span style="color: red;font-weight: bold">' + '…</span>'
     end
@@ -147,12 +154,11 @@ end
 
 def get_data_link(link, new_params = {})
   params = []
-  params << (new_params[:database] || @options.database.name)
-  params << (new_params[:table] || @options.database.table)
-  params << new_params[:query].to_s
-  params << @options.page_size
-  params << new_params[:offset].to_s
-  params.map!{|param| "'" + e_js(escape(param.to_s)) + "'" }
+  params << "'" + e_js(escape((new_params[:database] || @options.database.name).to_s)) + "'"
+  params << "'" + e_js(escape((new_params[:table] || @options.database.table).to_s)) + "'"
+  params << (new_params[:query] ? escape(new_params[:query].inspect) : "''")
+  params << @options.page_size.to_i
+  params << new_params[:offset].to_i
   '<a href="javascript:getData(' + params.join(', ') + ')">' + link + "</a>"
 end
 
