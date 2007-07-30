@@ -1451,6 +1451,14 @@
 			<key>patterns</key>
 			<array>
 				<dict>
+					<key>comment</key>
+					<string>Escaped from the regexp – there can also be 2 backslashes (since 1 will escape the first)</string>
+					<key>match</key>
+					<string>(\\){1,2}[.$^\[\]{}]</string>
+					<key>name</key>
+					<string>constant.character.escape.regex.php</string>
+				</dict>
+				<dict>
 					<key>include</key>
 					<string>#interpolation</string>
 				</dict>
@@ -1550,6 +1558,22 @@
 					<string>string.regexp.arbitrary-repitition.php</string>
 				</dict>
 				<dict>
+					<key>comment</key>
+					<string>Escaped from the regexp – there can also be 2 backslashes (since 1 will escape the first)</string>
+					<key>match</key>
+					<string>(\\){1,2}[.$^\[\]{}]</string>
+					<key>name</key>
+					<string>constant.character.escape.regex.php</string>
+				</dict>
+				<dict>
+					<key>comment</key>
+					<string>Escaped from the PHP string – there can also be 2 backslashes (since 1 will escape the first)</string>
+					<key>match</key>
+					<string>\\{1,2}[\\']</string>
+					<key>name</key>
+					<string>constant.character.escape.php</string>
+				</dict>
+				<dict>
 					<key>begin</key>
 					<string>\[(?:\^?\])?</string>
 					<key>captures</key>
@@ -1568,7 +1592,7 @@
 					<array>
 						<dict>
 							<key>match</key>
-							<string>\\[\\']</string>
+							<string>\\[\\'\[\]]</string>
 							<key>name</key>
 							<string>constant.character.escape.php</string>
 						</dict>
@@ -1579,12 +1603,6 @@
 					<string>[$^+*]</string>
 					<key>name</key>
 					<string>keyword.operator.regexp.php</string>
-				</dict>
-				<dict>
-					<key>match</key>
-					<string>\\[\\']</string>
-					<key>name</key>
-					<string>constant.character.escape.php</string>
 				</dict>
 			</array>
 		</dict>
@@ -1650,6 +1668,26 @@
 				</dict>
 				<dict>
 					<key>begin</key>
+					<string>`(?=[^`]*?")</string>
+					<key>comment</key>
+					<string>Unclosed strings must be captured to avoid them eating the remainder of the PHP script
+					Sample case: $sql = "SELECT * FROM bar WHERE foo = '" . $variable . "'"</string>
+					<key>end</key>
+					<string>(?=")</string>
+					<key>name</key>
+					<string>string.quoted.backtick.unclosed.sql</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\\[\\']</string>
+							<key>name</key>
+							<string>constant.character.escape.php</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
 					<string>\\"(?!([^\\"]|\\[^"])*\\")(?=(\\[^"]|.)*?")</string>
 					<key>comment</key>
 					<string>Unclosed strings must be captured to avoid them eating the remainder of the PHP script
@@ -1692,10 +1730,19 @@
 					</array>
 				</dict>
 				<dict>
-					<key>match</key>
-					<string>\\.</string>
+					<key>begin</key>
+					<string>`</string>
+					<key>end</key>
+					<string>`</string>
 					<key>name</key>
-					<string>constant.character.escape.php</string>
+					<string>string.quoted.backtick.sql</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>include</key>
+							<string>#interpolation</string>
+						</dict>
+					</array>
 				</dict>
 				<dict>
 					<key>begin</key>
@@ -1711,6 +1758,12 @@
 							<string>#interpolation</string>
 						</dict>
 					</array>
+				</dict>
+				<dict>
+					<key>match</key>
+					<string>\\.</string>
+					<key>name</key>
+					<string>constant.character.escape.php</string>
 				</dict>
 				<dict>
 					<key>include</key>
@@ -1772,6 +1825,26 @@
 					<string>(?=')</string>
 					<key>name</key>
 					<string>string.quoted.single.unclosed.sql</string>
+					<key>patterns</key>
+					<array>
+						<dict>
+							<key>match</key>
+							<string>\\[\\']</string>
+							<key>name</key>
+							<string>constant.character.escape.php</string>
+						</dict>
+					</array>
+				</dict>
+				<dict>
+					<key>begin</key>
+					<string>`(?=[^`]*?')</string>
+					<key>comment</key>
+					<string>Unclosed strings must be captured to avoid them eating the remainder of the PHP script
+					Sample case: $sql = "SELECT * FROM bar WHERE foo = '" . $variable . "'"</string>
+					<key>end</key>
+					<string>(?=')</string>
+					<key>name</key>
+					<string>string.quoted.backtick.unclosed.sql</string>
 					<key>patterns</key>
 					<array>
 						<dict>
