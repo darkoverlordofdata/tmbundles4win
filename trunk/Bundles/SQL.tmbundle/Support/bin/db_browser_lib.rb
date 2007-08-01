@@ -1,5 +1,5 @@
 # Add the path to the bundled libs to be used if the native bindings aren't installed
-$: << ENV['TM_BUNDLE_SUPPORT'] + '/lib/connectors' if ENV['TM_BUNDLE_SUPPORT']
+$: << ENV['TM_BUNDLE_SUPPORT'] + '/lib/' << ENV['TM_BUNDLE_SUPPORT'] + '/lib/connectors' if ENV['TM_BUNDLE_SUPPORT']
 
 require 'ostruct'
 require ENV['TM_SUPPORT_PATH'] + '/lib/password'
@@ -113,6 +113,27 @@ class Connector
     fields.each { |field| field_list << {:name => field[0], :type => field[1], :nullable => field[2], :default => field[4]} }
     field_list
   end
+  
+  # Quoting
+  def quote_field(field)
+    if @server == 'mysql'
+      return "`#{field}`"
+    else
+      return %Q{"#{field}"}
+    end
+  end
+
+  def quote_value(value)
+    if value.is_a? String
+      if @server == 'mysql'
+        return '"' + @@connector.escape_string(value) + '"'
+      else
+        return "'" + PGconn.escape(value) + "'"
+      end
+    else
+      return value.to_s
+    end
+  end
 end
 
 class Result
@@ -164,7 +185,10 @@ end
 def get_connection_settings(options)
   begin
     plist      = open(File.expand_path('~/Library/Preferences/com.macromates.textmate.plist')) { |io| OSX::PropertyList.load(io) }
-    connection = plist['SQL Connections'][plist['SQL Active Connection'].first.to_i]
+
+    unless connection = plist['SQL Connections'].find { |conn| conn['title'] == ENV['TM_SQL_CONNECTION'] }
+      connection = plist['SQL Connections'][plist['SQL Active Connection'].first.to_i]
+    end
 
     options.host   = connection['hostName']
     options.user   = connection['userName']
