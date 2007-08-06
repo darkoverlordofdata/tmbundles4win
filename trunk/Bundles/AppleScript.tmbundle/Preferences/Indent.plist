@@ -10,12 +10,15 @@
 	<dict>
 		<key>decreaseIndentPattern</key>
 		<string>(?x)
-		^\s* (end|else) \b .*$
+		^\s* (end|else|on\ error) \b .*$
 	</string>
 		<key>increaseIndentPattern</key>
 		<string>(?x)
 		^\s*
-		(tell \s+ (?! .* \b(to)\b) .*
+		(
+		 tell \s+ (?! .* \b(to)\b) .*
+		|tell\b.*?\bto\ tell \s+ (?! .* \b(to)\b) .*
+		|using\ terms\ from\b.*
 		|if\b .* \bthen\b
 		|else\b .*
 		|repeat\b .*
