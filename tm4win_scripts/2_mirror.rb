@@ -4,6 +4,8 @@ require 'find'
 require 'fileutils'
 include FileUtils::Verbose
 
+ENV['LC_CTYPE'] = "en_US.UTF-8"
+
 TMREPO_DIR  = "/home/gtc/repos/svn_textmate"
 TRANSIT_DIR = "/home/gtc/repos/tm4win_transit"
 WINREPO_DIR = "/home/gtc/repos/tmbundles4win"
