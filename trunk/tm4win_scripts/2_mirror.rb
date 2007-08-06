@@ -7,7 +7,7 @@ include FileUtils::Verbose
 TMREPO_DIR  = "/home/gtc/repos/svn_textmate"
 TRANSIT_DIR = "/home/gtc/repos/tm4win_transit"
 WINREPO_DIR = "/home/gtc/repos/tmbundles4win"
-BADCHARS = /([<>\|:\*…\"\?\\“”↵—↓↵‘’])/
+BADCHARS = /([<>\|:\*…\"\?\\“”↵—↓↵‘’¬])/
 
 def sanitize(f)
 	URI.escape(f, BADCHARS).chomp
