@@ -35,6 +35,15 @@ Urls should be marked as they usually are, and be used as links:   \url{http://w
   \sin(x)
 \end{align*}
 
+% The alltt environment allows for a verbatim type environment, where slashes and braces are still active characters. For now we treat it as verbatim, though we should likely fix that, which would involve moving the rules for matching all sorts of commands and environments to a repository rule (ouch).
+\begin{alltt}
+  <"problem"> This should not be matched as a string!
+  Math is allowed here. So are commands like \textbf{Hi there!}
+  \[
+    sin(x)
+  \]
+\end{alltt}
+
 % 6/14/05  many of the commands below are functions with arguments.  When recursion is in place these should work nicely.
 
 \foo[f]{bar}{$10 + 20$} Here is a simple single function with several parameters
@@ -134,7 +143,13 @@ class Vertex:
 \subsection{Subsection one}\label{sec:testLabel}
 This is a paragraph with some math $ \sin{3.1415} * \cos{3.1415} \angle  $.  This is an ordinary sentence after the math.  This works just fine with math mode including a rule for a bunch of math symbols.
 
-A runaway dollar sign should be indicated as illegal and matched until the end of the line: $ This is very \$ illegal.
+We would want the following to be matched as illegal:
+
+$\cos(x)
+
+$
+
+Because you can't have a paragraph break in a math environment. However, there is no easy way to make the grammar match two consecutive newlines, so this will have to wait. In the meantime, this means that runaway dollar signs will end up highlighting everything after them as math.
 
 \section[Optional title]{section 1}
 
