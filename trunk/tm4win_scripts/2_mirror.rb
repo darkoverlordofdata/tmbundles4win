@@ -5,6 +5,7 @@ require 'fileutils'
 include FileUtils::Verbose
 
 ENV['LC_CTYPE'] = "en_US.UTF-8"
+ENV['PATH'] = '/usr/sbin:/usr/bin:/usr/sfw/bin:/opt/csw/bin:/opt/csw/sbin:/opt/csw/gnu:/opt/csw/gcc3/bin:/opt/csw/mysql5/bin:/opt/csw/postgresql/bin:/opt/csw/apache2/bin:/opt/csw/apache2/sbin'
 
 TMREPO_DIR  = "/home/gtc/repos/svn_textmate"
 TRANSIT_DIR = "/home/gtc/repos/tm4win_transit"
