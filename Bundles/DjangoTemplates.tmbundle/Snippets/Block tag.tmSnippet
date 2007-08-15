@@ -3,14 +3,14 @@
 <plist version="1.0">
 <dict>
 	<key>content</key>
-	<string>${1:FIELDNAME} = models.NullBooleanField(${2:default=True})</string>
+	<string>{% $1 %}</string>
+	<key>keyEquivalent</key>
+	<string>^%</string>
 	<key>name</key>
-	<string>NullBooleanField</string>
+	<string>Block tag</string>
 	<key>scope</key>
-	<string>source.python.django</string>
-	<key>tabTrigger</key>
-	<string>nullboolean</string>
+	<string>text.html.django</string>
 	<key>uuid</key>
-	<string>21013818-A691-4E96-A889-70A0F2F28557</string>
+	<string>10C0357D-EB2C-4CC7-B361-391A35AE3C2E</string>
 </dict>
 </plist>
