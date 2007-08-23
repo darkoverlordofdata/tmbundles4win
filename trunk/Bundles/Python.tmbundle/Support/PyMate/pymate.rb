@@ -1,7 +1,7 @@
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/scriptmate"
 require "pathname"
 
-$SCRIPTMATE_VERSION = "$Revision: 8018 $"
+$SCRIPTMATE_VERSION = "$Revision: 8023 $"
 
 class PythonScript < UserScript
   def lang; "Python" end
@@ -47,7 +47,7 @@ class PyMate < ScriptMate
           elsif line =~ /^FAILED(.*)/
             "<span style=\"color: red\"><b>FAILED#{$1}</b></span><br/>"
           elsif line =~ /^OK(.*)/
-            "<span style=\"color: red\"><b>OK#{$1}</b></span><br/>"
+            "<span style=\"color: green\"><b>OK#{$1}</b></span><br/>"
           else
             htmlize(line)
           end
