@@ -1,7 +1,7 @@
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/scriptmate"
 require "cgi"
 
-$SCRIPTMATE_VERSION = "$Revision: 8131 $"
+$SCRIPTMATE_VERSION = "$Revision: 8136 $"
 
 class RubyScript < UserScript
   def lang; "Ruby" end
@@ -58,7 +58,7 @@ class RubyMate < ScriptMate
           elsif line =~ /([\w\_]+).*\[([\w\_\/\.]+)\:(\d+)\]/
             method, file, line = $1, $2, $3
             "<span><a style=\"color: blue;\" href=\"txmt://open?url=file://#{e_url(file)}&amp;line=#{line}\">#{method}</span>:#{line}<br/>"
-          elsif line =~ /^\d+ tests, \d+ assertions, (\d+) failures, (\d+) errors/
+          elsif line =~ /^\d+ tests, \d+ assertions, (\d+) failures, (\d+) errors\b.*/
             "<span style=\"color: #{$1 + $2 == "00" ? "green" : "red"}\">#{$&}</span><br/>"
           else
             htmlize(line)
