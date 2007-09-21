@@ -7,9 +7,7 @@
 	<key>command</key>
 	<string>#!/usr/bin/env ruby -wKU
 
-TEMPLATE_DIRS = ['/Library/Application Support/Apple/Developer Tools/Project Templates', ENV['HOME'] + '/Library/Application Support/Apple/Developer Tools/Project Templates']
 SUPPORT       = ENV['TM_SUPPORT_PATH']
-DIALOG        = ENV['DIALOG']
 MATE          = "#{SUPPORT}/bin/mate"
 
 require "#{SUPPORT}/lib/osx/plist"
@@ -19,6 +17,12 @@ require "cgi"
 require "fileutils"
 require "find"
 require "iconv"
+
+TEMPLATE_DIRS = [
+  '/Library/Application Support/Apple/Developer Tools/Project Templates',
+  %x{ "$TM_SUPPORT_PATH/bin/find_app" Xcode.app }.sub(/Applications\/Xcode.app$/, 'Library/Xcode/Project Templates'),
+  ENV['HOME'] + '/Library/Application Support/Apple/Developer Tools/Project Templates'
+]
 
 module ProcessTemplate
   module_function
@@ -57,7 +61,7 @@ module ProcessTemplate
   def process(dir, name)
     variables = {
       'DATE'                      =&gt; Time.now.strftime('%F'),
-      'FULLUSERNAME'              =&gt; `dscl . read "/Users/$USER" realname|cut -f2 -d:`.strip,
+      'FULLUSERNAME'              =&gt; `dscl . read "/Users/$USER" realname`.sub(/\A.*?realname:\s*(.*?)\s*\z/, '\1'),
       'ORGANIZATIONNAME'          =&gt; ENV['TM_ORGANIZATION_NAME'],
       'PRODUCTNAME'               =&gt; name,
       'PROJECTNAMEASIDENTIFIER'   =&gt; name.gsub(/[^a-zA-Z0-9]/, '_'),
