@@ -4,15 +4,15 @@
 <dict>
 	<key>content</key>
 	<string>${1:subsection name}
-${1/(.)|\s/(?1:*:*)/g}
+${1/(.)|\s/(?1:=:=)/g}
 $0</string>
 	<key>name</key>
-	<string>section 2</string>
+	<string>section 1</string>
 	<key>scope</key>
 	<string>text.restructuredtext</string>
 	<key>tabTrigger</key>
-	<string>subs</string>
+	<string>sec</string>
 	<key>uuid</key>
-	<string>CCE7CCB5-048A-4AC6-B4E0-90873466BA1A</string>
+	<string>7B6D031A-FF9A-475A-8FD4-F8C099F96313</string>
 </dict>
 </plist>
