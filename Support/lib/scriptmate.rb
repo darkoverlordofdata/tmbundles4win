@@ -6,7 +6,7 @@ require SUPPORT_LIB + 'io'
 require 'cgi'
 require 'fcntl'
 
-$SCRIPTMATE_VERSION = "$Revision: 7228 $"
+$SCRIPTMATE_VERSION = "$Revision: 8268 $"
 
 def my_popen3(*cmd) # returns [stdin, stdout, strerr, pid]
   pw = IO::pipe   # pipe[0] for read, pipe[1] for write
@@ -162,13 +162,6 @@ class UserScript
 end
 
 class ScriptMate < CommandMate
-  def initialize(command)
-    # ScriptMate expects an instance of the (sub)class UserScript.
-    @error = ""
-    STDOUT.sync = true
-    @command = command
-    @mate = self.class.name
-  end
 
   protected
     def emit_header
