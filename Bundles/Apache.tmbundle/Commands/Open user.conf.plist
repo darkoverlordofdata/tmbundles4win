@@ -5,7 +5,7 @@
 	<key>beforeRunningCommand</key>
 	<string>nop</string>
 	<key>command</key>
-	<string>if [[ -f "/etc/apache2/$USER.conf" ]]
+	<string>if [[ -f "/etc/apache2/users/$USER.conf" ]]
 
 	then
 	#Apache 2
@@ -28,7 +28,7 @@ fi
 	<key>name</key>
 	<string>Open Config for Current User</string>
 	<key>output</key>
-	<string>showAsHTML</string>
+	<string>discard</string>
 	<key>scope</key>
 	<string>source.apache-config</string>
 	<key>uuid</key>
