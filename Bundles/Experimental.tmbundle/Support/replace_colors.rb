@@ -1,5 +1,5 @@
 #!/usr/bin/env ruby
-# Replace all of the occurances of the selected color with the chosen color in the current document.
+# Replace all of the occurrences of the selected color with the chosen color in the current document.
 # Thomas Aylott -- subtleGradient.com
 
 require ENV['TM_SUPPORT_PATH'] + "/lib/ui"
@@ -28,6 +28,7 @@ unless @original_color and @original_color.match(VALID_COLOR)
 end
 
 @replaced_color = TextMate::UI.request_color(@original_color)
+error! if @replaced_color.nil?
 
 norm = normalize_color(@replaced_color)
 error! unless norm
@@ -55,4 +56,4 @@ File.open(FILENAME, 'w') { |file|
 }
 
 `osascript -e 'tell the application "finder" to activate' -e 'tell the application "textmate" to activate'`
-print "Replaced every occurance \n of #@original_color with #@replaced_color \n in #{ENV['TM_FILENAME']}"
+print "Replaced every occurrence \n of #@original_color with #@replaced_color \n in #{ENV['TM_FILENAME']}"
