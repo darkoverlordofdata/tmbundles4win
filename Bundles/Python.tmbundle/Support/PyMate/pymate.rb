@@ -1,9 +1,11 @@
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/scriptmate"
 require "pathname"
+$KCODE = 'u'
+require 'jcode'
 
 STDOUT.sync = true
 
-$SCRIPTMATE_VERSION = "$Revision: 8836 $"
+$SCRIPTMATE_VERSION = "$Revision: 8839 $"
 
 class PythonScript < UserScript
   def lang; "Python" end

@@ -6,7 +6,10 @@ require SUPPORT_LIB + 'io'
 require 'cgi'
 require 'fcntl'
 
-$SCRIPTMATE_VERSION = "$Revision: 8836 $"
+$KCODE = 'u'
+require 'jcode'
+
+$SCRIPTMATE_VERSION = "$Revision: 8839 $"
 
 def my_popen3(*cmd) # returns [stdin, stdout, strerr, pid]
   pw = IO::pipe   # pipe[0] for read, pipe[1] for write
