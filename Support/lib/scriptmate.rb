@@ -6,7 +6,7 @@ require SUPPORT_LIB + 'io'
 require 'cgi'
 require 'fcntl'
 
-$SCRIPTMATE_VERSION = "$Revision: 8442 $"
+$SCRIPTMATE_VERSION = "$Revision: 8836 $"
 
 def my_popen3(*cmd) # returns [stdin, stdout, strerr, pid]
   pw = IO::pipe   # pipe[0] for read, pipe[1] for write
@@ -248,6 +248,11 @@ HTML
 
     div.scriptmate a {
     	color: #FF5600;
+    }
+    
+    div#exception_report pre.snippet {
+      margin:4pt;
+      padding:4pt;
     }
   </style>
   <strong class="warning" style="float:left; color:#B4AF00;">#{@command.warning}</strong>
