@@ -12,7 +12,7 @@ require 'rails_bundle_tools'
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/escape"
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/web_preview"
 
-$RAKEMATE_VERSION = "$Revision: 6193 $"
+$RAKEMATE_VERSION = "$Revision: 9061 $"
 
 Dir.chdir TextMate.project_directory
 
@@ -33,7 +33,7 @@ OptionParser.new do |opts|
   opts.on("-a", "--answer [ANSWER TEXT]", "Default answer for the question.") do |answer|
     options[:answer] = answer
   end
-  
+
   opts.on("-v", "--variable [VARIABLE]", "Variable to assign the ANSWER to.") do |variable|
     options[:variable] = variable
   end
