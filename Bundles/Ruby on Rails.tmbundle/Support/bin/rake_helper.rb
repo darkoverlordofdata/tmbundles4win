@@ -12,7 +12,7 @@ require 'rails_bundle_tools'
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/escape"
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/web_preview"
 
-$RAKEMATE_VERSION = "$Revision: 9064 $"
+$RAKEMATE_VERSION = "$Revision: 6193 $"
 
 Dir.chdir TextMate.project_directory
 
