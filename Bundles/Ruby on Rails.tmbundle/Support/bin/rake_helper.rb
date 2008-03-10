@@ -12,7 +12,7 @@ require 'rails_bundle_tools'
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/escape"
 require "#{ENV["TM_SUPPORT_PATH"]}/lib/web_preview"
 
-$RAKEMATE_VERSION = "$Revision: 9069 $"
+$RAKEMATE_VERSION = "$Revision: 9078 $"
 
 Dir.chdir TextMate.project_directory
 
@@ -44,7 +44,12 @@ OptionParser.new do |opts|
 end.parse!
 
 if options[:question]
-  unless options[:answer] = TextMate.input(options[:question], options[:answer] || "", :title => options[:title] || "Rake")
+  unless options[:answer] = TextMate::UI.request_string(
+    :title => options[:title] || "Rake", 
+    :default => options[:answer] || "",
+    :prompt => options[:question],
+    :button1 => 'Continue'
+  )
     TextMate.exit_discard
   end
 end
