@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 # tm/executor.rb
 #
 # Provides some tools to create “Run Script” commands
@@ -27,24 +29,32 @@
 # Your block will be called with type :out or :err.  If you don't want to handle a particular type,
 # return nil and Executor will apply basic formatting for you.
 #
-# TextMate::Executor.run also accepts four optional named arguments.
+# TextMate::Executor.run also accepts six optional named arguments.
 #   :version_args are arguments that will be passed to the executable to generate a version string for use as the page's subtitle.
 #   :version_regex is a regular expression to which the resulting version string is passed.
-#     $1 of this regex is used as the subtitle of the Executor.run output.  By default, this just takes the first line.
+#     The subtitle of the Executor.run output is generated from this match.  By default, this just takes the first line.
+#   :version_replace is a string that is used to generate a version string for the page's subtitle from matching :version_regex.
+#     The rules of String.sub apply.  By default, this just extracts $1 from the match.
 #   :verb describes what the call to Executor is doing.  Default is “Running”.
 #   :env is the environment in which the command will be run.  Default is ENV.
+#   :interactive_input tells Executor to inject the interactive input library
+#     into the program so that any requests for input present the user with a
+#     dialog to enter it. Default is true, or false if the environment has
+#     TM_INTERACTIVE_INPUT_DISABLED defined.
 #   :script_args are arguments to be passed to the *script* as opposed to the interpreter.  They will
 #     be appended after the path to the script in the arguments to the interpreter.
+#   :use_hashbang Tells Executor wether to override it's first argument with the current file's #! if that exists.
+#     The default is “true”.  Set it to “false” to prevent the hash bang from overriding the interpreter.
 
 SUPPORT_LIB = ENV['TM_SUPPORT_PATH'] + '/lib/'
 require SUPPORT_LIB + 'tm/process'
 require SUPPORT_LIB + 'tm/htmloutput'
 require SUPPORT_LIB + 'tm/require_cmd'
 require SUPPORT_LIB + 'escape'
+require SUPPORT_LIB + 'exit_codes'
 require SUPPORT_LIB + 'io'
 
-$KCODE = 'u'
-require 'jcode'
+$KCODE = 'u' if RUBY_VERSION < "1.9"
 
 $stdout.sync = true
 
@@ -59,17 +69,24 @@ module TextMate
         block ||= Proc.new {}
         args.flatten!
 
-        options = {:bootstrap     => ENV["TM_BUNDLE_SUPPORT"]+"/bin/bootstrap.sh",
-                   :version_args  => ['--version'],
-                   :version_regex => /\A(.*)$/,
-                   :verb          => "Running",
-                   :env           => nil,
-                   :script_args   => []}
+        options = {:version_args      => ['--version'],
+                   :version_regex     => /\A(.*)$(?:\n.*)*/,
+                   :version_replace   => '\1',
+                   :verb              => "Running",
+                   :env               => nil,
+                   :interactive_input => ENV['TM_INTERACTIVE_INPUT_DISABLED'].nil?,
+                   :script_args       => [],
+                   :use_hashbang      => true,
+                   :controls          => {}}
+        
+        passthrough_options = [:env, :input, :interactive_input]
+
+        options[:bootstrap] = ENV["TM_BUNDLE_SUPPORT"] + "/bin/bootstrap.sh" unless ENV["TM_BUNDLE_SUPPORT"].nil?
 
         options.merge! args.pop if args.last.is_a? Hash
 
-        if File.exists?(args[-1])
-          args[0] = ($1.chomp.split if /\A#!(.*)$/ =~ File.read(args[-1])) || args[0]
+        if File.exists?(args[-1]) and options[:use_hashbang] == true
+          args[0] = parse_hashbang(args[-1]) || args[0]
         end
 
         # TODO: checking for an array here because a #! line
@@ -78,8 +95,7 @@ module TextMate
         # should do in that case -- Alex Ross
         TextMate.require_cmd(args[0]) unless args[0].is_a?(Array)
         
-        out, err = Process.run(args[0], options[:version_args], :interactive_input => false)
-        version = $1 if options[:version_regex] =~ (out + err)
+        version = parse_version(args[0], options)
         
         tm_error_fd_read, tm_error_fd_write = ::IO.pipe
         tm_error_fd_read.fcntl(Fcntl::F_SETFD, 1)
@@ -91,14 +107,9 @@ module TextMate
 
         options[:script_args].each { |arg| args << arg }
         
-        TextMate::HTMLOutput.show(:title => "#{options[:verb]} “#{ENV['TM_DISPLAYNAME']}”…", :sub_title => version, :html_head => script_style_header) do |io|
+        TextMate::HTMLOutput.show(:title => "#{options[:verb]} “#{ENV['TM_DISPLAYNAME'] || File.basename(ENV["TM_FILEPATH"])}”…", :sub_title => version, :html_head => script_style_header) do |io|
           
           io << '<div class="executor">'
-          if ENV.has_key?("TM_EXECUTOR_PROJECT_MASTER_IS_MISSING")
-            io << "<h2 class=\"warning\">The file suggested by <code>TM_PROJECT_MASTER</code> does not exist.</h2>\n"
-            io << "<p>The file “<code>#{ENV["TM_FILEPATH"]}</code>” named by the environment variable <code>TM_PROJECT_MASTER</code> could not be found.  Please unset or correct TM_PROJECT_MASTER.</p>"
-            return
-          end
           
           callback = proc do |str, type|
             str.gsub!(ENV["TM_FILEPATH"], "untitled") if ENV["TM_FILE_IS_UNTITLED"]
@@ -113,18 +124,22 @@ module TextMate
             end
           end
           
+          process_options = {:echo => true, :watch_fds => { :echo => tm_echo_fd_read }}
+          passthrough_options.each { |key| process_options[key] = options[key] if options.has_key?(key) }
+          
           io << "<!-- » #{args[0,args.length-1].join(" ")} #{ENV["TM_DISPLAYNAME"]} -->"
           
-          if File.exists?(options[:bootstrap])
+          if options.has_key?(:bootstrap) and File.exists?(options[:bootstrap])
             raise "Bootstrap script is not executable." unless File.executable?(options[:bootstrap])
             args[0,0] = options[:bootstrap] # add the bootstrap script to the front of args
           end
           
           start = Time.now
           process_output_wrapper(io) do
-            TextMate::Process.run(args, :env => options[:env], :echo => true, :watch_fds => { :echo => tm_echo_fd_read }, &callback)
+            TextMate::Process.run(args, process_options, &callback)
           end
           finish = Time.now
+          
           
           tm_error_fd_write.close
           error = tm_error_fd_read.read
@@ -145,15 +160,27 @@ module TextMate
           end
 
           io << error
-          io << '<div class="controls"><a href="#" onclick="copyOutput(document.getElementById(\'_executor_output\'))">copy output</a></div>'
-          io << format("<div id=\"exception_report\" class=\"framed\">Program exited after %0.2f seconds.</div>", finish-start)
+          io << '<div class="controls"><a href="#" onclick="copyOutput(document.getElementById(\'_executor_output\'))">copy output</a>'
+          
+          options[:controls].each_key {|key| io << " | <a href=\"javascript:TextMate.system('#{options[:controls][key]}')\">#{key}</a>"}
           
           io << '</div>'
+          
+
+          io << "<div id=\"exception_report\" class=\"framed\">"
+          if $?.exited?
+            io << format("Program exited with code \##{$?.exitstatus} after %0.2f seconds.", finish-start)
+          elsif $?.signaled?
+            io << format("Program terminated by uncaught signal \##{$?.termsig} after %0.2f seconds.", finish-start)
+          elsif $?.stopped?
+            io << format("Program stopped by signal \##{$?.termsig} after %0.2f seconds.", finish-start)
+          end
+          io << '</div></div>'
         end
       end
       
       def make_project_master_current_document
-        if (ENV.has_key?("TM_PROJECT_DIRECTORY") and ENV.has_key?("TM_PROJECT_MASTER"))
+        if (ENV.has_key?("TM_PROJECT_DIRECTORY") and ENV.has_key?("TM_PROJECT_MASTER") and not ENV["TM_PROJECT_MASTER"] == "")
           proj_dir    = ENV["TM_PROJECT_DIRECTORY"]
           proj_master = ENV["TM_PROJECT_MASTER"]
           if proj_master[0].chr == "/"
@@ -162,7 +189,11 @@ module TextMate
             filepath = "#{proj_dir}/#{proj_master}"
           end
           unless File.exists?(filepath)
-            ENV["TM_EXECUTOR_PROJECT_MASTER_IS_MISSING"] = 'true'
+            TextMate::HTMLOutput.show(:title => "Bad TM_PROJECT_MASTER!", :sub_title => "") do |io|
+              io << "<h2 class=\"warning\">The file suggested by <code>TM_PROJECT_MASTER</code> does not exist.</h2>\n"
+              io << "<p>The file “<code>#{filepath}</code>” named by the environment variable <code>TM_PROJECT_MASTER</code> could not be found.  Please unset or correct TM_PROJECT_MASTER.</p>"
+            end
+            TextMate.exit_show_html
           end
           ENV['TM_FILEPATH']    = filepath
           ENV['TM_FILENAME']    = File.basename filepath
@@ -171,10 +202,24 @@ module TextMate
         end
       end
 
+      def parse_hashbang(file)
+        $1.chomp.split if /\A#!(.*)$/ =~ File.read(file)
+      end
+
+      def parse_version(executable, options)
+        out, err = TextMate::Process.run(executable, options[:version_args], :interactive_input => false)
+        if options[:version_regex] =~ (out + err)
+          return (out + err).sub(options[:version_regex], options[:version_replace])
+        end
+      end
+
       private
 
       def process_output_wrapper(io)
         io << <<-HTML
+
+<script type="text/javascript" charset="utf-8">document.body.addEventListener("keydown", press, false);</script>
+
 <!-- first box containing version info and script output -->
 <pre>
 <div id="_executor_output" > <!-- Script output -->
@@ -191,11 +236,10 @@ HTML
   <script type="text/javascript" charset="utf-8">
   function press(evt) {
      if (evt.keyCode == 67 && evt.ctrlKey == true) {
-        TextMate.system("kill -s INT #{@pid}; sleep 0.5; kill -s TERM #{@pid}", null);
+       TextMate.system("kill -s USR1 #{::Process.pid};", null);
      }
   }
-  document.body.addEventListener('keydown', press, false);
-
+  
   function copyOutput(element) {
     output = element.innerText;
     cmd = TextMate.system('__CF_USER_TEXT_ENCODING=$UID:0x8000100:0x8000100 /usr/bin/pbcopy', function(){});
@@ -203,6 +247,7 @@ HTML
     cmd.close();
     element.innerText = 'output copied to clipboard';
   }
+  
   </script>
   <!-- end javascript -->
   <style type="text/css">

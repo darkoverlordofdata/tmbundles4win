@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 SUPPORT_LIB = ENV['TM_SUPPORT_PATH'] + '/lib/'
 require SUPPORT_LIB + 'escape'
 require SUPPORT_LIB + 'web_preview'
@@ -10,7 +12,7 @@ require 'fcntl'
 $KCODE = 'u'
 require 'jcode'
 
-$SCRIPTMATE_VERSION = "$Revision: 9925 $"
+$SCRIPTMATE_VERSION = "$Revision: 11069 $"
 
 def my_popen3(*cmd) # returns [stdin, stdout, strerr, pid]
   pw = IO::pipe   # pipe[0] for read, pipe[1] for write

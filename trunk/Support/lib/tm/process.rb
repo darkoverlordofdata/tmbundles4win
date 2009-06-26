@@ -72,6 +72,77 @@
 require ENV['TM_SUPPORT_PATH'] + '/lib/io'
 require 'fcntl'
 
+module PTree # Process Tree Construction
+    module_function
+
+    def insert(tree, node)
+        if tree[:pid] == node[:ppid]
+            tree[:children] << node
+        else
+            tree[:children].find { |child| insert(child, node) }
+        end
+    end
+
+    def build
+        tree = { :pid => 0, :cmd => 'System Startup', :children => [ ] }
+
+        list=%x{ps -axww -o "ppid,pid,command="|{ read header; sort -rnk2|sort -snk1; }}
+        list.each do |line|
+            abort "Syntax error: #{line}" unless line =~ /^\s*(\d+)\s+(\d+)\s+(.*)$/
+            node = { :ppid => $1.to_i, :pid => $2.to_i, :cmd => $3, :children => [ ] }
+            abort "Inconsistent Process Tree: #{line}" unless insert(tree, node)
+        end
+
+        tree
+    end
+
+    def find(tree, pid)
+        return tree if tree[:pid] == pid
+
+        tree[:children].each do |child|
+            res = find(child, pid)
+            return res unless res.nil?
+        end
+
+        nil
+    end
+
+    def traverse(tree, &block)
+        tree[:children].each { |child| traverse(child, &block) }
+        block.call(tree)
+    end
+end
+
+def pid_exists?(pid)
+    %x{ps >/dev/null -xp #{pid}}
+    $? == 0
+end
+
+def kill_and_wait(pid)
+    begin
+        Process.kill("INT", pid)
+        20.times { return unless pid_exists?(pid); sleep 0.02 }
+        Process.kill("TERM", pid)
+        20.times { return unless pid_exists?(pid); sleep 0.02 }
+        Process.kill("KILL", pid)
+    rescue
+        # process doesn't exist anymore
+    end
+end
+
+def setup_kill_handler(pid, &block)
+    Signal.trap("USR1") do
+        did_kill = false
+        PTree.traverse(PTree.find(PTree.build, pid)) do |node|
+            if !did_kill && pid_exists?(node[:pid])
+                block.call("^C: #{node[:cmd]} (pid: #{node[:pid]})\n", :err)
+                kill_and_wait(node[:pid])
+                did_kill = true
+            end
+        end
+	end
+end
+
 module TextMate
   module Process
     class << self
@@ -99,7 +170,6 @@ module TextMate
         io[0][0].fcntl(6, ENV['TM_PID'].to_i) if ENV.has_key? 'TM_PID'
 
         pid = fork {
-          
           at_exit { exit! }
           
           STDIN.reopen(io[0][0])
@@ -124,18 +194,6 @@ module TextMate
 
           exec(*cmd.compact)
         }
-
-        %w[INT TERM].each do |signal|
-          trap(signal) do
-            begin
-              Process.kill("KILL", pid)
-              sleep 0.5
-              Process.kill("TERM", pid)
-            rescue
-              # process doesn't exist anymore
-            end
-          end
-        end
 
         [ io[0][0], io[1][1], io[2][1] ].each { |fd| fd.close }
 
@@ -164,6 +222,8 @@ module TextMate
         IO.blocksize = options[:granularity] if options[:granularity].is_a? Integer
         previous_sync = IO.sync
         IO.sync = true unless options[:granularity] == :line
+
+        setup_kill_handler(pid, &block)
 
         IO.exhaust(options[:watch_fds].merge(:out => io[1][0], :err => io[2][0]), &block)
         ::Process.waitpid(pid)

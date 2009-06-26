@@ -93,7 +93,8 @@ class GrailsPath
     # Remove extras
     case file_type
       when :controller then name.sub!(/Controller$/, '')
-      when :view then name = dirname.split('/').pop.capitalize
+      when :view then name = dirname.split('/').pop
+        name[0..0] = name[0..0].upcase
       when :domain_class then name
       when :service then name.sub!(/Service$/, '')
       when :taglib then name.sub!(/TagLib$/, '')
@@ -113,7 +114,7 @@ class GrailsPath
         buffer.find_method(:direction => :backwards).first rescue nil
       when :view
         basename
-      # when :integration_test
+      # when :unit_test
       #   buffer.find_method(:direction => :backwards).first.sub('^test_', '')
       else nil
       end
@@ -143,12 +144,12 @@ class GrailsPath
         when %r{/grails-app/controllers/(.+Controller\.(groovy))$}      then :controller
         when %r{/grails-app/views/(.+\.(#{VIEW_EXTENSIONS * '|'}))$}    then :view
         when %r{/grails-app/domain/(.+\.(groovy))$}                     then :domain_class
-        when %r{/grails-app/service/(.+Service\.(groovy))$}             then :service
+        when %r{/grails-app/services/(.+Service\.(groovy))$}             then :service
         when %r{/grails-app/taglib/(.+TagLib\.(groovy))$}               then :taglib
-        when %r{/test/integration/(.+ControllerTests\.(groovy))$}       then :controller_test
-        when %r{/test/integration/(.+ServiceTests\.(groovy))$}          then :service_test
-        when %r{/test/integration/(.+TagLibTests\.(groovy))$}           then :taglib_test
-        when %r{/test/integration/(.+Tests\.(groovy))$}                 then :domain_class_test
+        when %r{/test/unit/(.+ControllerTests\.(groovy))$}       then :controller_test
+        when %r{/test/unit/(.+ServiceTests\.(groovy))$}          then :service_test
+        when %r{/test/unit/(.+TagLibTests\.(groovy))$}           then :taglib_test
+        when %r{/test/unit/(.+Tests\.(groovy))$}                 then :domain_class_test
         else nil
       end
     # Store the tail (modules + file) after the regexp
@@ -205,22 +206,29 @@ class GrailsPath
     end
   end
   
+  def view_dir
+    if @view_dir.nil?
+      @view_dir = artifact_base_name
+      @view_dir[0..0] = @view_dir[0..0].downcase
+    end
+    @view_dir
+  end
   def grails_path_for_view
     return ask_for_view("index") if action_name.nil?
     
     file_exists = false
     VIEW_EXTENSIONS.each do |e|
       filename_with_extension = action_name + "." + e
-      existing_view = File.join(grails_root, stubs[:view], artifact_base_name.downcase, filename_with_extension)
+      existing_view = File.join(grails_root, stubs[:view], view_dir, filename_with_extension)
       return GrailsPath.new(existing_view) if File.exist?(existing_view)
     end
-    default_view = File.join(grails_root, stubs[:view], artifact_base_name.downcase, action_name + default_extension_for(:view))
+    default_view = File.join(grails_root, stubs[:view], view_dir, action_name + default_extension_for(:view))
     return GrailsPath.new(default_view)
   end
   
   def ask_for_view(default_name = action_name)
     if designated_name = TextMate.input("Enter the name of the new view file:", default_name + default_extension_for(:view))
-      view_file = File.join(grails_root, stubs[:view], artifact_base_name.downcase, designated_name)
+      view_file = File.join(grails_root, stubs[:view], view_dir, designated_name)
       # FIXME: For some reason the following line freezes TextMate
       # TextMate.refresh_project_drawer
       return GrailsPath.new(view_file)
@@ -235,10 +243,10 @@ class GrailsPath
       :domain_class => 'grails-app/domain',
       :service => 'grails-app/services',
       :taglib => 'grails-app/taglib',
-      :controller_test => 'test/integration',
-      :domain_class_test => 'test/integration',
-      :service_test => 'test/integration',
-      :taglib_test => 'test/integration'
+      :controller_test => 'test/unit',
+      :domain_class_test => 'test/unit',
+      :service_test => 'test/unit',
+      :taglib_test => 'test/unit'
     }
   end
   
