@@ -10,7 +10,7 @@
 BUNDLE_SUPPORT = ENV['TM_BUNDLE_SUPPORT']
 SUPPORT_PATH = ENV['TM_SUPPORT_PATH']
 
-PASTE_URL = ENV['TM_PASTIE_URL'] || 'http://pastie.textmate.org/pastes/'
+PASTE_URL = ENV['TM_PASTIE_URL'] || 'http://pastie.textmate.org/pastes'
 
 require "#{BUNDLE_SUPPORT}/lib/doctohtml.rb"
 require "#{SUPPORT_PATH}/lib/textmate"
@@ -148,7 +148,7 @@ end
 
 def strip_leading(text, ch = ' ')
   count = text.gsub(/&lt;[^&gt;]+&gt;/, '').split("\n").map { |e| e =~ /^#{ch}*(?!#{ch}|$)/ ? $&amp;.length : nil }.reject { |e| e.nil? }.min
-  text.send(text.respond_to?(:lines) ? :lines : :to_s).map { |line| count.times { line.sub!(/^(&lt;[^&gt;]+&gt;)*#{ch}/, '\1') }; line }.join
+  text.send(text.respond_to?(:lines) ? :lines : :to_s).map { |line| count.times { line.sub!(/^((&lt;[^&gt;]+&gt;)*)#{ch}/, '\1') }; line }.join
 end
 
 URL_REGEXP = %r{
@@ -228,7 +228,7 @@ def paste_stdin(priv, wrap)
         when :timeout then "Timeout pasting #{amount} after #{time_elapsed}\n"
         when :cancel  then "User cancelled pasting of #{amount} after #{time_elapsed}\n"
         when :error   then "Unknown error after #{time_elapsed} pasting #{amount}\n"
-        else           "Pasted #{amount} in #{time_elapsed}\n"
+        else           "Pasted #{amount} in #{time_elapsed}: #{res}\n"
       end
   end
 

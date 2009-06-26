@@ -1,4 +1,6 @@
 #!/usr/bin/env ruby
+# encoding: utf-8
+
 require "#{ENV['TM_SUPPORT_PATH']}/lib/osx/plist"
 require "#{ENV['TM_SUPPORT_PATH']}/lib/escape"
 require "#{ENV['TM_SUPPORT_PATH']}/lib/exit_codes"
@@ -9,14 +11,11 @@ module TextMate
 
   class << self
     def app_path
-      return %x{ps -xwwp "$TM_PID" -o "command"|tail -n1}.sub(%r{(.app)/Contents/MacOS/.*\n}, '\1') if ENV.has_key? 'TM_PID'
+      ENV['TM_APP_PATH'] || %x{ps -xwwp "$TM_PID" -o "command="}.sub(%r{(.app)/Contents/MacOS/.*\n}, '\1')
+    end
 
-      # legacy code, required before TextMate r1466
-      apps = %x{ps -xwwco "pid command"}
-      apps.send(apps.respond_to?(:lines) ? :lines : :to_s).grep(/^\s*(\d+)\s+(TextMate)$/) do |match|
-        return %x{ps -xwwp #{$1} -o "command"|tail -n1}.sub(%r{(.app)/Contents/MacOS/TextMate.*\n}, '\1')
-      end
-      raise AppPathNotFoundException
+    def app_name
+      return %x{ps -cxwwp "$TM_PID" -o "command="}.chomp
     end
 
     def go_to(options = {})
@@ -61,6 +60,30 @@ module TextMate
       end
     end
 
+    def require_env_var(env_var, message = nil)
+      unless ENV.has_key? env_var
+        require ENV['TM_SUPPORT_PATH'] + '/lib/tm/htmloutput'
+        TextMate::HTMLOutput.show(
+          :title      => "Environment Variable Not Set",
+          :sub_title  => "Environment Variable Not Set - #{env_var}"
+        ) do |io|
+          io << <<-HTML
+            <h3 class="error">The environment variable <tt>#{env_var}</tt> is unset.</h3>
+
+            <p>#{message || "To succesfully run this action you need to
+            set the <tt>«#{env_var}»</tt> environment variable. If you know that it is already
+            installed on your system, you instead need to update
+            your search path."}</p>
+
+            <p>The manual has a section about
+            <a href=\"help:anchor='static_variables'%20bookID='TextMate%20Help'\">
+            setting environment variables</a>.</p>
+          HTML
+        end
+        TextMate.exit_show_html
+      end
+    end
+    
     def min_support(version)
       actual_version = ::IO.read(ENV['TM_SUPPORT_PATH'] + '/version').to_i
       if actual_version < version then
