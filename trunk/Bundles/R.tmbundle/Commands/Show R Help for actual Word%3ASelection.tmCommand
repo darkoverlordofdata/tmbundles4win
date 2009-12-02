@@ -190,12 +190,17 @@ fi
 
 
 if [ "$TM_R_SHOW_ALWAYS_HELPSEARCH" == "1" ]; then
-	"$TM_BUNDLE_SUPPORT"/bin/askRhelperDaemon.sh "@getSearchHelp('^$WORD$',F)"
+	"$TM_BUNDLE_SUPPORT"/bin/askRhelperDaemon.sh "@getHelpURL('$WORD'$LIB)"
 	FILE=$(cat "$RhelperAnswer")
 	if [ -z "$FILE" -o "$FILE" == "NA" ]; then
 		CNT=0
+		FILE=""
 	else
 		CNT=`echo -e "$FILE" | wc -l`
+		if [ $CNT -eq 1 ]; then
+			theLib=$(echo "$FILE" | perl -pe 's!.*?/library/(.*?)/.*!$1!')
+			FILE="$theLib	$WORD	$FILE"
+		fi
 	fi
 	BEGINSEARCH=""
 fi
@@ -283,8 +288,8 @@ else
 			echo "&lt;tr&gt;&lt;td&gt;$lib&lt;/td&gt;&lt;td&gt;&lt;a href='tm-file://$link' target='data'&gt;$fun&lt;/a&gt;&lt;/td&gt;&lt;/tr&gt;" &gt;&gt; "$HEAD"
 		done
 		if [ $CNT -eq 1 ]; then
-			echo "&lt;base href=\"tm-file://$link\"&gt;"
-			cat "$link" | iconv -s -f ISO8859-1 -t UTF-8
+			echo "&lt;base href=\"tm-file://$link\"&gt;" &gt; "$DATA"
+			cat "$link" | iconv -s -f ISO8859-1 -t UTF-8 &gt;&gt; "$DATA"
 		fi
 	fi
 fi
