@@ -10,7 +10,7 @@ ENV['PATH'] = '/home/gtc/bin:/usr/sbin:/usr/bin:/usr/sfw/bin:/opt/csw/bin:/opt/c
 TMREPO_DIR  = "/home/gtc/repos/svn_textmate"
 TRANSIT_DIR = "/home/gtc/repos/tm4win_transit"
 WINREPO_DIR = "/home/gtc/repos/tmbundles4win"
-BADCHARS = /([<>\|:\*…\"\?\\“”↵—↓↵‘’¬]β↵)/
+BADCHARS = /([<>\|:\*…\"\?\\“”↵—↓↵‘’¬]β↵&)/
 
 def sanitize(f)
 	URI.escape(f, BADCHARS).chomp
